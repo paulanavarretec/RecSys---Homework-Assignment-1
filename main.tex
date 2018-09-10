@@ -38,6 +38,14 @@
 \usepackage{listings}
 \usepackage{color}
 
+
+\usepackage[table,xcdraw]{xcolor}
+\usepackage[document]{ragged2e}
+
+
+
+
+
 \definecolor{miverde}{rgb}{0,0.6,0}
 \definecolor{migris}{rgb}{0.5,0.5,0.5}
 \definecolor{mimalva}{rgb}{0.58,0,0.82}
@@ -88,10 +96,11 @@ Homework Assignment 1
 %         {\tt\small pmisra@cs.wright.edu}}
 % %}
 
-\centering \author{ Paula Navarrete Campos\\
-        Department of Industrial and Systems Engineering\\
+\centering \author{ Paula Navarrete Campos \& Astrid San Martín\\
+        Department of Computer Science\\
         School of Engineering\\
-        {\tt\small pcnavarr@uc.cl}}
+        Pontifical Catholic University\\
+        {\tt\small pcnavarr@uc.cl, aesanmar@uc.cl}}
 
 \noaffiliation
 
@@ -107,7 +116,7 @@ Homework Assignment 1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\justify
 This work develops a recommendation system for the beer industry based on Collaborative Filtering. Schafer et al. (2007) \cite{c1} and Koren et al. (2009) \cite{c3} disentangle key concepts on collaborative filtering (CF), exposing its main uses, algorithms and design decisions regarding rating systems and ratings acquisition. 
 There is some common grounded theory to take into account when designing and developing a recommender system, mainly regarding approach, data nature and purpose of the software.
 
@@ -127,14 +136,95 @@ Collaborative Filtering is the process of filtering or evaluating items using th
 
 \section{Exploratory Data Analysis}
 
-Breve análisis de los datos que incluya, al menos, estadísticas
-de los usuarios, densidad del dataset y gráficos de distribución (usuario/ítem e ítems/usuario).
-responder si es explicit or implicit feedback feedback. Característica de la matriz, es sparce o dense? qué método han sugerido los papers leidos que funcionará mejor?
+We present in this section a brief analysis of the data. It is important to get acquainted with the different kind of data we are dealing, its shape and distribution have a lot to say when choosing an optimal solution.
+
+Table \ref{raw-data} shows the first and last rows of the available data. 
+
+\begin{table}[]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline 
+\rowcolor[HTML]{DAE8FC} 
+userID & itemID & styleID & rating & brewerID & timestamp  \\ \hline \hline
+4924   & 11757  & 84      & 4.5    & 1199     & 1247372118 \\ \hline
+4924   & 5441   & 2       & 4.5    & 1199     & 1209176445 \\ \hline
+4924   & 19960  & 84      & 5.0    & 1199     & 1223914717 \\ \hline
+\dots       &        &         &        &          &            \\ \hline
+6118   & 20470  & 64      & 4.0    & 394      & 1204330634 \\ \hline
+6118   & 1324   & 59      & 3.5    & 263      & 1212967655 \\ \hline
+7268   & 1504   & 13      & 5.0    & 568      & 1157647130 \\ \hline
+\end{tabular}
+\caption{Raw data}
+\label{raw-data}
+\end{table}
+
+As we can see, users and items are represented by an integer value, style and brewer too, rating is represented with a decimal number and they all range in a wide spectrum. But we need a little bit more information to see if we have enough users and/or items to be able to predict something.
+
+Table \ref{unique-instances} depicts how many different users, items, styles, rating, brewerID and timestamps there are in the whole set. It shows we have a large sample, compounded by many users and (a lot less) items, and we have more users than items (as expected). We have ten different decimal ratings (we guess 0 to 5 incremented by 0.5). We can see we have a lot less different styles and brewers.
+
+\begin{table}[]
+\centering
+\begin{tabular}{|
+>{\columncolor[HTML]{DAE8FC}}c |l|}
+\hline
+userID    & 8318  \\ \hline
+itemID    & 1836  \\ \hline
+styleID   & 95    \\ \hline
+rating    & 10    \\ \hline
+brewerID  & 210   \\ \hline
+timestamp & 43905 \\ \hline
+\end{tabular}
+\caption{Number of unique instances for each feature}
+\label{unique-instances}
+\end{table}
 
 \begin{enumerate}
     \item \textbf{Density}
     
-    
+    \begin{itemize}
+        \item Ratings
+        
+         Table \ref{rating-description} takes a deeper look into the shape of the data, to do that, we use different statistic functions provided by \textit{pandas library}. It is important to notice that the overall mean rating is $3.8$ and the lowest $25\%$ of the ratings are below $3.5$ and the highest $25\%$ of the ratings are above $4.5$.
+         
+         \noindent
+      
+        \begin{table}[]
+        \begin{tabular}{|
+        >{\columncolor[HTML]{DAE8FC}}c |l|}
+        \hline
+        mean & 3.864910 \\ \hline
+        std & 0.712695 \\ \hline
+        min & 0.000000 \\ \hline
+        25\% & 3.500000 \\ \hline
+        50\% & 4.000000 \\ \hline
+        75\% & 4.500000 \\ \hline
+        \multicolumn{1}{|c|}{\cellcolor[HTML]{DAE8FC}max} & 5.000000 \\ \hline
+        \end{tabular}
+        \caption{Rating description}
+        \label{rating-description}
+        \end{table}
+                
+        
+        
+        \justify
+        
+        The skewness of a sample is a measure for symmetry, and encompasses the lack of it. Any symmetric data should have a skewness near zero: negative values indicate data that are skewed left and positive values for the skewness indicate data that are skewed right. By skewed left, we mean that the left tail is long relative to the right tail and the skewness of the rating feature ($skew = -1.01$) refects this.
+        
+        The kurtosis of a sample is a measure of whether the data are heavy-tailed or light-tailed relative to a normal distribution which has a kurtosis of zero. Data sets with high kurtosis (positive values) tend to have heavy tails or outliers, which is our case fot the ratings ($kurt =1.6$), and data sets with low kurtosis (negative valueas) tend to have light tails, or lack of outliers. 
+        
+        All characteristics mentioned above can be visualized on figure \ref{fig:density-ranting-values}. We can appreciate the ratings are biased to $4.0$ and they tend to accumulate around it.
+        
+        \begin{figure}[h]
+            \includegraphics[scale=0.4]{density-ranting-values.png}
+            \centering
+            \caption{Density for user rating observations}
+            % Figure reference: \ref{fig:fig-name}
+            % Figure page reference:  \pageref{fig-name} 
+            \label{fig:density-ranting-values}
+        \end{figure}
+        
+        \item \textbf{Users}: The shape of the figure \ref{fig:user-density} is congruent with the tendency to have less users in the beginnig (the so-called early adopters) giving lots of ratings and helping the system to learn, and afterwads, a lot of new users giving a lot of less reviews. The same can be chequed out analogously for the items. We checked skewness ($skew=0.5$) and kurtosis($kurt=-0.9$) and confirmed bigger right tail and lack of outliers.
+        
         \begin{figure}[h]
             
             \includegraphics[scale=0.4]{userID_hist-kde.png}
@@ -145,11 +235,8 @@ responder si es explicit or implicit feedback feedback. Característica de la ma
             \label{fig:user-density}
             
         \end{figure}
-        
-        The shape of the figure \ref{fig:user-density} is congruent with the tendency to have less users in the beginnig (the so-called early adopters) giving lots of ratings and helping the system to learn, and afterwads, a lot of new users giving a lot of less reviews. The same can be chequed out analogously for the items.
-
- 
-
+            
+        \item \textbf{Items}:  It is interesting what the figure \ref{fig:item-density} shows. We can see a sort of different waves, characterized by a peak of ratings for some items, but a comparable bigger tail of items rated comparatively less. This may suggest that new items were introduced in 4 to 5 waves along time, where we initial introductions brought several more reviews per item introduced than the later, making sense with the previous analysis of users.
         
         \begin{figure}[h]
             
@@ -162,32 +249,97 @@ responder si es explicit or implicit feedback feedback. Característica de la ma
             
         \end{figure}
         
-        It is interesting what the figure \ref{fig:item-density} shows. We can see a sort of different waves, characterized by a peak of ratings for some items, but a comparable bigger tail of items rated comparatively less. This may suggest that new items were introduced in 4 to 5 waves along time, where we initial introductions brought several more reviews per item introduced than the later, making sense with the previous analysis of users.
+    \end{itemize}
+    
+        
     
     \item \textbf{Distribution}
     
+    \begin{itemize}
+        \item \textbf{User/Item}: we calculated the number of ratings per user. Table \ref{table:userid-itemid-description} shows a brief description of the data. The table is very informative, we can see that at least $25\%$ of the users have given just $1$ ranting, and that no more than $25\%$ of the users have given more than $5$ ratings. In average, users give $5$ ratings. The positive value for the skewness ($skew=5$) indicates that the right tail is bigger than the left, wich is consistent with our previous knowledge that there should be many users rating few items and much more less rating a lot. The kurtosis ($kurt=38.7$) high value is also consistent with this, showing the presence of outliers (users at the top of table). This can be clearly seen in the distribution figure below. Figure \ref{fig:userid-rating-frec} depicts this, although all this analysis relates userID with number of ratings, this tells us that the users with very few ratings are the ones with higher userID (maybe the ones that joined the system afterwards the early adopters), 
+        
+        \begin{figure}[h]
+            \includegraphics[scale=0.4]{userid-rating-frec.png}
+            \centering
+            \caption{Density for item rating observations}
+            % Figure reference: \ref{fig:fig-name}
+            % Figure page reference:  \pageref{fig-name} 
+            \label{fig:userid-rating-frec}
+        \end{figure}
+        
+        
+        
+        \begin{table}[]
+        \begin{tabular}{@{}l|c|c|@{}}
+        \cmidrule & \cellcolor[HTML]{DAE8FC}userID & \cellcolor[HTML]{DAE8FC}userRatings \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}count} & 8318                           & 8318                                \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}mean}  & 4159.91                        & 5.33                                \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}std}   & 2401.78                        & 9.9                                 \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}min}   & 1                              & 1                                   \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}25\%}  & 2080                           & 1                                   \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}50\%}  & 4159                           & 2                                   \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}75\%}  & 6239                           & 5                                   \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}max}   & 8320                           & 181                                 \\ \bottomrule
+        \end{tabular}
+        \caption{Description of user observations per userID}
+        \label{table:userid-itemid-description}
+        \end{table}
+        
+        We worked the data a little in order to explore how the distribution of number of ratings per user behaves. We got a positive value for the skewness ($skew=0.96$) indicates that the right tail is bigger than the left, which is consistent with our previous knowledge that there should be few users rating a lot of items and substantially more rating just a few. The kurtosis positive value ($kurt=1.67$) is also consistent with this, showing the presence of outliers (users at the top of table that are far away from the mean). This can be clearly seen in the distribution figure \ref{fig:ratings-per-user-density}.
+        
+        \begin{figure}[h]
+            \includegraphics[scale=0.4]{ratings-per-user-density.png}
+            \centering
+            \caption{Distribution for user number of ratings}
+            % Figure reference: \ref{fig:fig-name}
+            % Figure page reference:  \pageref{fig-name} 
+            \label{fig:ratings-per-user-density}
+        \end{figure}
+        
+        
+        
+        \item \textbf{Item/User}: Making the same analysis as before for the rated items distribution, we worked the data to get the number of ratings per item. Table \ref{table:rating-observations-per-itemID} resumes the relevant information. We can see that at least $25\%$ of the items have been rated just once and that no more than $25\%$ of the items have been rated more than $7$ times. Items get approximately $24$ ratings In average. The positive value for the skewness ($skew=10.32$) indicates that the right tail is bigger than the left, which is consistent with our previous knowledge that there should be many items with few user ratings and much more less with a lot of rating. The kurtosis extreme high value ($kurt=136.46$) is also consistent with this, showing the presence of outliers (items at the top of table, we infer the most popular items). This can be clearly seen in the distribution figure \ref{fig:itemid-rating-frec}.
+        
+        
          \begin{figure}[h]
             
-            \includegraphics[scale=0.4]{User-item_distribution.png}
+            \includegraphics[scale=0.4]{itemid-rating-frec.png}
             \centering
             \caption{Distribution for user itemRatings}
             % Figure reference: \ref{fig:fig-name}
             % Figure page reference:  \pageref{fig-name} 
-            \label{fig:user-distribution}
-            
+            \label{fig:itemid-rating-frec}
         \end{figure}
         
+       
+        \begin{table}[]
+        \begin{tabular}{@{}l|c|c|@{}}
+        \cmidrule & \cellcolor[HTML]{DAE8FC}userID & \cellcolor[HTML]{DAE8FC}userRatings \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}count} & 1836                           & 1836                                \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}mean}  & 40440                          & 24                                  \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}std}   & 22286                          & 113                                 \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}min}   & 175                            & 1                                   \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}25\%}  & 21640.                         & 1                                   \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}50\%}  & 41525                          & 2                                   \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}75\%}  & 60511                          & 7                                   \\ \midrule
+        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}max}   & 77207                          & 2205                                \\ \bottomrule
+        \end{tabular}
+        \caption{Description of rating observations per itemID}
+        \label{table:rating-observations-per-itemID}
+        \end{table}
+        
+        Although, same as before, the figure relates itemID with number of ratings, this tells us that the items with a lot of ratings are the ones with lower itemID (maybe the items that joined the system in the first stages and got much more time of exposure to user than the later ones), we worked the data to explore how the distribution of number of ratings per item behaves. We found that at least $25\%$ of the items have less than $40$ ratings and at most $25\%$ of the items hace more tan 230 ratings, on average items have aproximatelly $200$ ratings. The skewness ($skew=3.02$) indicates that the right tail is bigger than the left, wich is consistent with what we have discussed and the kurtosis ($kurt=11.14$) value reveals the presence of the Most Popular items outliers (items at the end of table that are far away from the mean). This can be clearly seen in the distribution figure \ref{fig:ratings-per-item-density}.
+        
         \begin{figure}[h]
-            
-            \includegraphics[scale=0.4]{Item-user_distribution.png}
+            \includegraphics[scale=0.4]{ratings-per-item-density.png}
             \centering
-            \caption{Distribution for item userRatings}
+            \caption{Distribution for item number of ratings}
             % Figure reference: \ref{fig:fig-name}
             % Figure page reference:  \pageref{fig-name} 
-            \label{fig:item-distribution}
-            
+            \label{fig:ratings-per-item-density}
         \end{figure}
-    
+        
+    \end{itemize}
     
 \end{enumerate}
 
@@ -246,6 +398,64 @@ calcular también tiempo de ejecución, procesamiento y memoria requeridos.
 El informe debe tener una tabla donde las filas presentan
 los métodos y las columnas las metricas RMSE, MAE, MAP@10 y nDCG@10. Presente en esta tabla cada método sólo una vez. Si el método tiene parámetros, presente la versión del método con los parámetros que le dieron mejores resultados.
 
+\begin{table}[]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline 
+\rowcolor[HTML]{DAE8FC} 
+Algorithm & parameters & MAE & RMSE & MAP@10 & nDCG@10   \\ \hline \hline
+UserKnn   & k=30  &  0.5014 &  0.6572   & 0.0014 & 0.0010 \\ \hline
+ItemKnn   & k=30  &  0.4919 &  0.6586 &  0.0058 & 0.0073  \\ \hline
+SlopeOne   & -  &   0.4841 &  0.6471   &   0.0002   &  0.0002 \\ \hline
+
+SVD   & f=1000-it=100  & 0.4536 &  0.6020   &   0.0178   & 0.0107  \\ \hline
+\dots       &        &         &        &          &            \\ \hline
+ALS   & -   & -     & -    &    -   & - \\ \hline
+
+\end{tabular}
+\caption{Results}
+\label{raw-data}
+\end{table}
+
+\begin{figure}[h]
+            \includegraphics[scale=0.4]{MAE_itemKnn.png}
+            \centering
+            \caption{MAE plot for ItemKnn}
+            \label{fig:MAE_ItemKnn}
+        \end{figure}
+ \begin{figure}[h]
+            \includegraphics[scale=0.4]{RMSE_itemKnn.png}
+            \centering
+            \caption{RMSE plot for ItemKnn}
+            \label{fig:RMSE_ItemKnn}
+        \end{figure}       
+
+\begin{figure}[h]
+            \includegraphics[scale=0.4]{MAE_userKnn.png}
+            \centering
+            \caption{MAE plot for UserKnn}
+            \label{fig:MAE_UserKnn}
+        \end{figure}
+ \begin{figure}[h]
+            \includegraphics[scale=0.4]{RMSE_userKnn.png}
+            \centering
+            \caption{RMSE plot for UserKnn}
+            \label{fig:RMSE_UserKnn}
+        \end{figure} 
+
+\begin{figure}[h]
+            \includegraphics[scale=0.4]{MAE_SVD.png}
+            \centering
+            \caption{MAE plot for SVD}
+            \label{fig:MAE_SVD}
+        \end{figure}
+ \begin{figure}[h]
+            \includegraphics[scale=0.4]{RMSE_SVD.png}
+            \centering
+            \caption{RMSE plot for SVD}
+            \label{fig:RMSE_SVD}
+        \end{figure}
+
 \section{Results}
 
 Describir los resultados obtenidos. Además deben comparar y
@@ -257,6 +467,59 @@ nDCG).
 
 Explicar el efecto de los diferentes parámetros
 que escogieron en los resultados obtenidos.
+\begin{enumerate}
+    \item Item Knn: pretty straightforward. Optimal at 30 neighbors
+    
+    \begin{figure}[h]
+        \includegraphics[scale=0.4]{item_knn-param-analysis.png}
+        \centering
+        \caption{MAE and RMSE Error against item KNN Neighborhoods}
+        % Figure reference: \ref{fig:fig-name}
+        % Figure page reference:  \pageref{fig-name} 
+        \label{fig:item_knn-param-analysis}
+    \end{figure}
+        
+    \item User Knn: \\
+    
+    We had to set an improvement threshold of 0.001 to stop the descent.\\
+    
+\begin{figure}[h]
+        \includegraphics[scale=0.4]{user_knn-param-analysis.png}
+        \centering
+        \caption{MAE and RMSE Error against user KNN Neighborhoods}
+        % Figure reference: \ref{fig:fig-name}
+        % Figure page reference:  \pageref{fig-name} 
+        \label{fig:user_knn-param-analysis}
+    \end{figure}
+    
+    \item SVD:
+    
+    \begin{itemize}
+        \item Factor analysis\\ 
+        We had to set an improvement threshold of 0.001 to stop the descent.\\
+        Min MAE factor:  0.455 con 150 factores\\
+        Min RMSE factor:  0.602 con 200 factores
+    
+        \begin{figure}[h]
+            \includegraphics[scale=0.4]{SVD-param-analysis.png}
+            \centering
+            \caption{MAE and RMSE Error against number of factors}
+            % Figure reference: \ref{fig:fig-name}
+            % Figure page reference:  \pageref{fig-name} 
+            \label{fig:SVD-param-analysis}
+        \end{figure}
+        
+        \item Iterations analysis\\
+        Plot looks the same as figure \ref{fig:SVD-param-analysis}, the error Plot looks the same, the error diminishment is marginal:\\
+        
+        Min MAE iterations:  0.454 con 150 max-iterations\\
+        Min RMSE iterations:  0.601 con 200 max-iterations
+        
+        
+        
+    \end{itemize}
+    
+\end{enumerate}
 
 \section{Conclusion}
 
