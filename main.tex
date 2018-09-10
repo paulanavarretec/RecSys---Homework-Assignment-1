@@ -137,6 +137,8 @@ Collaborative Filtering is the process of filtering or evaluating items using th
 \section{Exploratory Data Analysis}
 
 We present in this section a brief analysis of the data. It is important to get acquainted with the different kind of data we are dealing, its shape and distribution have a lot to say when choosing an optimal solution.
+All the code produced to generate this report can be consulted in the following GitHub Repo url: \underline{\url{https://github.com/paulanavarretec/RecSys-Tarea1}}.
+
 
 Table \ref{raw-data} shows the first and last rows of the available data. 
 
@@ -166,13 +168,13 @@ Table \ref{unique-instances} depicts how many different users, items, styles, ra
 \centering
 \begin{tabular}{|
 >{\columncolor[HTML]{DAE8FC}}c |l|}
-\hline
+\hline \hline
 userID    & 8318  \\ \hline
 itemID    & 1836  \\ \hline
 styleID   & 95    \\ \hline
 rating    & 10    \\ \hline
 brewerID  & 210   \\ \hline
-timestamp & 43905 \\ \hline
+timestamp & 43905 \\ \hline \hline
 \end{tabular}
 \caption{Number of unique instances for each feature}
 \label{unique-instances}
@@ -185,26 +187,22 @@ timestamp & 43905 \\ \hline
         \item Ratings
         
          Table \ref{rating-description} takes a deeper look into the shape of the data, to do that, we use different statistic functions provided by \textit{pandas library}. It is important to notice that the overall mean rating is $3.8$ and the lowest $25\%$ of the ratings are below $3.5$ and the highest $25\%$ of the ratings are above $4.5$.
-         
-         \noindent
-      
+        
         \begin{table}[]
-        \begin{tabular}{|
-        >{\columncolor[HTML]{DAE8FC}}c |l|}
-        \hline
-        mean & 3.864910 \\ \hline
-        std & 0.712695 \\ \hline
-        min & 0.000000 \\ \hline
-        25\% & 3.500000 \\ \hline
-        50\% & 4.000000 \\ \hline
-        75\% & 4.500000 \\ \hline
-        \multicolumn{1}{|c|}{\cellcolor[HTML]{DAE8FC}max} & 5.000000 \\ \hline
-        \end{tabular}
+            \centering
+            \begin{tabular}{|>{\columncolor[HTML]{DAE8FC}}c|c|}
+            \hline \hline
+            mean & 3.865 \\ \hline
+            std & 0.713 \\ \hline
+            min & 0.0 \\ \hline \hline
+            25\% & 3.5 \\ \hline
+            50\% & 4.0 \\ \hline
+            75\% & 4.5 \\ \hline \hline
+            \end{tabular}
         \caption{Rating description}
         \label{rating-description}
         \end{table}
-                
-        
+            
         
         \justify
         
@@ -270,16 +268,23 @@ timestamp & 43905 \\ \hline
         
         
         \begin{table}[]
-        \begin{tabular}{@{}l|c|c|@{}}
-        \cmidrule & \cellcolor[HTML]{DAE8FC}userID & \cellcolor[HTML]{DAE8FC}userRatings \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}count} & 8318                           & 8318                                \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}mean}  & 4159.91                        & 5.33                                \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}std}   & 2401.78                        & 9.9                                 \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}min}   & 1                              & 1                                   \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}25\%}  & 2080                           & 1                                   \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}50\%}  & 4159                           & 2                                   \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}75\%}  & 6239                           & 5                                   \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}max}   & 8320                           & 181                                 \\ \bottomrule
+        \centering
+        \begin{tabular}{|>{\columncolor[HTML]{DAE8FC}}c|c|c|}
+        \hline 
+        \rowcolor[HTML]{DAE8FC} 
+                    & UserID & userRatings   \\ \hline \hline
+        count       & 8318      &  8318 \\ \hline
+        mean        & 4159.91   &  5.33 \\ \hline
+        std         & 2401.78   &  9.9  \\ \hline\hline
+        min         & 1         & 1     \\ \hline
+        25\%        & 2080      & 1     \\ \hline
+        50\%        & 4159.5    & 2     \\ \hline
+        75\%        & 6239      & 5     \\ \hline
+        max\%        & 8320      & 181   \\ \hline\hline
+        skewness    &   -  &  5.0   \\ \hline
+        kurtosis    &   -  &  38.7  \\ \hline\hline
+        
+        
         \end{tabular}
         \caption{Description of user observations per userID}
         \label{table:userid-itemid-description}
@@ -313,20 +318,28 @@ timestamp & 43905 \\ \hline
         
        
         \begin{table}[]
-        \begin{tabular}{@{}l|c|c|@{}}
-        \cmidrule & \cellcolor[HTML]{DAE8FC}userID & \cellcolor[HTML]{DAE8FC}userRatings \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}count} & 1836                           & 1836                                \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}mean}  & 40440                          & 24                                  \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}std}   & 22286                          & 113                                 \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}min}   & 175                            & 1                                   \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}25\%}  & 21640.                         & 1                                   \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}50\%}  & 41525                          & 2                                   \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}75\%}  & 60511                          & 7                                   \\ \midrule
-        \multicolumn{1}{|l|}{\cellcolor[HTML]{DAE8FC}max}   & 77207                          & 2205                                \\ \bottomrule
+        \centering
+        \begin{tabular}{|>{\columncolor[HTML]{DAE8FC}}c|c|c|}
+        \hline 
+        \rowcolor[HTML]{DAE8FC} 
+                    & UserID & itemRatings   \\ \hline \hline
+        count       & 1836      &  1836 \\ \hline
+        mean        & 40.440    &  24   \\ \hline
+        std         & 22.286    &  113  \\ \hline\hline
+        min         & 175       & 1     \\ \hline
+        25\%        & 21.640    & 1     \\ \hline
+        50\%        & 41.525    & 2     \\ \hline
+        75\%        & 60.511    & 7   \\ \hline
+        max         & 77.207    & 2.205   \\ \hline\hline
+        skewness    &  -   &  10.3   \\ \hline
+        kurtosis    &   -  &  136.5  \\ \hline\hline
+        
+        
         \end{tabular}
         \caption{Description of rating observations per itemID}
         \label{table:rating-observations-per-itemID}
         \end{table}
+
         
         Although, same as before, the figure relates itemID with number of ratings, this tells us that the items with a lot of ratings are the ones with lower itemID (maybe the items that joined the system in the first stages and got much more time of exposure to user than the later ones), we worked the data to explore how the distribution of number of ratings per item behaves. We found that at least $25\%$ of the items have less than $40$ ratings and at most $25\%$ of the items hace more tan 230 ratings, on average items have aproximatelly $200$ ratings. The skewness ($skew=3.02$) indicates that the right tail is bigger than the left, wich is consistent with what we have discussed and the kurtosis ($kurt=11.14$) value reveals the presence of the Most Popular items outliers (items at the end of table that are far away from the mean). This can be clearly seen in the distribution figure \ref{fig:ratings-per-item-density}.
         
@@ -456,19 +469,19 @@ ALS   & -   & -     & -    &    -   & - \\ \hline
             \label{fig:RMSE_SVD}
         \end{figure}
 
-\section{Results}
+\section{Discussion}
 
 Describir los resultados obtenidos. Además deben comparar y
 analizar los diferentes métodos respecto a, al menos, su implementación (dificultades y otros),
 tiempo de ejecución, procesamiento y memoria requeridos, y métricas de rendimiento (RMSE y
 nDCG).
 
-\section{Sensitivity Analysis (Discussion?)}
+\section{Sensitivity Analysis}
 
-Explicar el efecto de los diferentes parámetros
-que escogieron en los resultados obtenidos.
+In this section we analyse the effect the diferent model parameters have on the results.
+
 \begin{enumerate}
-    \item Item Knn: pretty straightforward. Optimal at 30 neighbors
+    \item Item Knn: figure \ref{fig:item_knn-param-analysis} depicts the MAE and RMSE progression according to different neighbor carnality. It is pretty straightforward to notice to see that it has an inverted U-shape relationship, the optimal (minimum error) can be found at approximately 30 neighbors.
     
     \begin{figure}[h]
         \includegraphics[scale=0.4]{item_knn-param-analysis.png}
@@ -479,9 +492,7 @@ que escogieron en los resultados obtenidos.
         \label{fig:item_knn-param-analysis}
     \end{figure}
         
-    \item User Knn: \\
-    
-    We had to set an improvement threshold of 0.001 to stop the descent.\\
+    \item User Knn: figure \ref{fig:user_knn-param-analysis} also shows MAE and RMSE progression according to different neighbor carnality. The effect of increasing the number of neighbors it is marginal over the error. We had to set an improvement threshold of $0.01$ to stop the descent, otherwise, the algorithm keeps kinding that adding one neighbor improves the error. That lead us to the asymptotic bound of $0.492$ for $MAE$ and $0.649$ for $RMSE$ with $100$ neighbors, beyond those bounds, the error improvement of the model is unsignificant. But we can see relatively no improvement from $20$ neighbors and forth, training more would only mean more cpu, memory and time expense with relatively no improvement. 
     
 \begin{figure}[h]
         \includegraphics[scale=0.4]{user_knn-param-analysis.png}
@@ -492,13 +503,10 @@ que escogieron en los resultados obtenidos.
         \label{fig:user_knn-param-analysis}
     \end{figure}
     
-    \item SVD:
+    \item SVD
     
     \begin{itemize}
-        \item Factor analysis\\ 
-        We had to set an improvement threshold of 0.001 to stop the descent.\\
-        Min MAE factor:  0.455 con 150 factores\\
-        Min RMSE factor:  0.602 con 200 factores
+        \item Factor analysis: same as with userKnn, he had to set an improvement threshold per iteration of $0.001$ decrement on error to stop the descent. Having that done, the minimal $MAE$ and $RMSE$ found was $0.455$ with $150$ factors and $0.602$ with $200$ factors. Figure \ref{fig:SVD-param-analysis} shows MAE and RMSE progression according to increasing factor cardinality.
     
         \begin{figure}[h]
             \includegraphics[scale=0.4]{SVD-param-analysis.png}
@@ -509,13 +517,7 @@ que escogieron en los resultados obtenidos.
             \label{fig:SVD-param-analysis}
         \end{figure}
         
-        \item Iterations analysis\\
-        Plot looks the same as figure \ref{fig:SVD-param-analysis}, the error Plot looks the same, the error diminishment is marginal:\\
-        
-        Min MAE iterations:  0.454 con 150 max-iterations\\
-        Min RMSE iterations:  0.601 con 200 max-iterations
-        
-        
+        \item Iterations analysis: we has a similar situation for the iterations parameter. The error descent was so marginal that the progression plot looked exactly as Figure \ref{fig:SVD-param-analysis} just shown. The minimal $MAE$ and $RMSE$ found was $0.454$ with $150$ max-iterations and $0.601$ with $200$ max-iterations.
         
     \end{itemize}
     
@@ -523,7 +525,8 @@ que escogieron en los resultados obtenidos.
 
 \section{Conclusion}
 
-Conclusiones a las que se llegó luego de realizar la tarea.
+In this work we developed several recommendation algorithms for a beer selling platform. The data analysis section allowed us to get a more profound comprehension of the inherent complexities of the used data, finding out that they indeed suffer from dimensionality issues like many items with poor rating frequency and only a couple with exorbitantly high number of ratings,  we infer those items are the most popular ones. The case of users, was less extreme in the case that the users that had a higher rating frequency were no so outliered than the rest and the mean ratings per user was much higher than for the item case. This has a direct impact on the algorithm performance, placing userKnn has more neighbors better positioned at ranking task than ItemKnn but reporting worst performance on error measurements. Even so, SVD beats them all on error and ranking performance.
+
 
 
 \addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
