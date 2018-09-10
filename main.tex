@@ -411,7 +411,7 @@ In this section we present the experimental design selected. We describe the met
     This algorithm is based on the concept of deviation between items and users \cite{c7}, which item will like best a user than another.\\
     It is subtracted the average rating of the two items considered for the deviation, this is the deviation between the item j and the item k:
     \begin{equation}
-        dev_{j,k} = \sum_{u_i\in I_{jk}} \frac{r_{ij}-r{ik}}{card(I_{jk})}
+        dev_{j,k} = \sum_{u_i\in I_{jk}} \frac{r_{ij}-r_{ik}}{card(I_{jk})}
     \end{equation}
     where $I_{jk}$ is the user set with rated item $j$ and $k$.
     For the prediction of the unknown rating:
@@ -551,7 +551,7 @@ ALS       &  - \\ \hline
 In this section we discuss and analyze the effect the different model parameters have on the results.\\
 
 \begin{enumerate}
-    \item Item Knn: figure \ref{fig:item_knn-param-analysis} depicts the MAE and RMSE progression according to different neighbor carnality. It is pretty straightforward to notice to see that it has an inverted U-shape relationship, the optimal (minimum error) can be found at approximately 30 neighbors.
+    \item Item Knn: figure \ref{fig:item_knn-param-analysis} depicts the MAE and RMSE progression according to different neighbor carnality. It is pretty straightforward to notice that it has an inverted U-shape relationship, the optimal (minimum error) can be found at approximately 30 neighbors.
     
     \begin{figure}[h]
         \includegraphics[scale=0.4]{item_knn-param-analysis.png}
@@ -562,7 +562,7 @@ In this section we discuss and analyze the effect the different model parameters
         \label{fig:item_knn-param-analysis}
     \end{figure}
         
-    \item User Knn: figure \ref{fig:user_knn-param-analysis} also shows MAE and RMSE progression according to different neighbor carnality. The effect of increasing the number of neighbors it is marginal over the error. We had to set an improvement threshold of $0.01$ to stop the descent, otherwise, the algorithm keeps kinding that adding one neighbor improves the error. That lead us to the asymptotic bound of $0.492$ for $MAE$ and $0.649$ for $RMSE$ with $100$ neighbors, beyond those bounds, the error improvement of the model is unsignificant. But we can see relatively no improvement from $20$ neighbors and forth, training more would only mean more cpu, memory and time expense with relatively no improvement. 
+    \item User Knn: figure \ref{fig:user_knn-param-analysis} also shows MAE and RMSE progression according to different neighbor carnality. The effect of increasing the number of neighbors it is marginal over the error. We had to set an improvement threshold of $0.01$ to stop the descent, otherwise, the algorithm keeps finding that adding one neighbor improves the error. That lead us to the asymptotic bound of $0.492$ for $MAE$ and $0.649$ for $RMSE$ with $100$ neighbors, beyond those bounds, the error improvement of the model is unsignificant. But we can see relatively no improvement from $20$ neighbors and forth, training more would only mean more CPU, memory and time expense with relatively no improvement. 
     
 \begin{figure}[h]
         \includegraphics[scale=0.4]{user_knn-param-analysis.png}
