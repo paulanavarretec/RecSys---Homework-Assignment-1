@@ -117,8 +117,8 @@ Homework Assignment 1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \justify
-This work develops a recommendation system for the beer industry based on Collaborative Filtering. Schafer et al. (2007) \cite{c1} and Koren et al. (2009) \cite{c3} disentangle key concepts on collaborative filtering (CF), exposing its main uses, algorithms and design decisions regarding rating systems and ratings acquisition. 
-There is some common grounded theory to take into account when designing and developing a recommender system, mainly regarding approach, data nature and purpose of the software.
+In this work we develop several algorithm tests for a recommendation system for the beer industry based on Collaborative Filtering. Schafer et al. (2007) \cite{c1} and Koren et al. (2009) \cite{c3} disentangle key concepts on collaborative filtering (CF), exposing its main uses, algorithms and design decisions regarding rating systems and ratings acquisition. 
+There is some common grounded theory to take into account when designing and developing a recommender system, mainly regarding approach, data nature and purpose of the software. We test 5 methods: \textit{UserKnn}, \textit{ItemKnn}, \textit{SlopeOne}, \textit{SVD} and \textit{ALS}. From our experiments we note that \textit{SVD} achieves the best performance in term of the metrics and execution time.
 
 \section{Introduction and Objectives}
 
@@ -358,23 +358,24 @@ timestamp & 43905 \\ \hline \hline
 
 \section{Experimental Design}
 
-Describir de forma breve la metodología de los experimentos: Qué
-se hizo con los datos y por qué (particiones, cross-validation, etc.), qué métodos se usaron y por
-qué.
-calcular también tiempo de ejecución, procesamiento y memoria requeridos.
+In this section we present the experimental design selected. We describe the methods and the experimental plan to be performed.\\
+
+
+\subsection{Methods}
 \begin{enumerate}
 
-    \item \textbf{UserKnn:} This algorithm interprets similar users as neighbors, if the user $n$ is similar to the user $u$, then $n$ is a neighbor of $u$. It generates a prediction for an item $i$ by analyzing the ratings for $i$ from the users in the neighborhood of $u$. Where:
+    \item \textbf{UserKnn: } This algorithm interprets similar users as neighbors, if the user $n$ is similar to the user $u$, then $n$ is a neighbor of $u$. It generates a prediction for an item $i$ by analyzing the ratings for $i$ from the users in the neighborhood of $u$. Where:
     
     \begin{equation}
         pred(u,i)=\Bar{r}+ \frac{\displaystyle \sum_{n \subset N(u)}uSim(u,n)*(r_{ni}-\Bar{r}_{n})}{\displaystyle \sum_{n \subset N(u)}uSim(u,n)}
     \end{equation}
-    Donde $N(u)$ son los vecinos de $u$ y corresponde a la predicción para item i que evalúa los ratings para ese i de los vecinos de u. Esta fomulación corrige las variaciones en la escala de rating y pondera cada uno por las similaridades de cada usuario con u (el término inferior corresponde a la normalización del resultado).
     
-    Una forma de medir la similaridad expresada en la formulación anterior es a través de la correlación de Pearson, donde: 
+    Where $N(u)$ are the neighbors of $u$ and corresponds to the predicction for item $i$ that evaluates the ratings for $i$ from the neighbors of $u$. This formulation corrects for variations on the rating scale and weights it by each user' similarity to $u$ (the lower term corresponds to the result's normalization)
+    
+    A way to measure the similarity in this formulation is through Pearson Correlation:
     
     \begin{equation}
-        uSim(u,n)= \frac{ \sum_{i \subset CR(u,n)}(r_{ui}-\Bar{r}_{u})(r_{ni}-\Bar{r}_{n})}{ \displaystyle \sqrt{\displaystyle \sum_{i \subset CR_{(u,n)}}(r_{ui}-\Bar{r}_{u})^2}  \sqrt{\displaystyle \sum_{i \subset CR_{(u,n)}}(r_{ni}-\Bar{r}_{n})^2} }
+        uSim(u,n)= \frac{\displaystyle \sum_{i \subset CR(u,n)}(r_{ui}-\Bar{r}_{u})(r_{ni}-\Bar{r}_{n})}{ \displaystyle \sqrt{\displaystyle \sum_{i \subset CR_{(u,n)}}(r_{ui}-\Bar{r}_{u})^2}  \sqrt{\displaystyle \sum_{i \subset CR_{(u,n)}}(r_{ni}-\Bar{r}_{n})^2} }
     \end{equation}
     
     Where $CR_{(u, n)} $ are the coevaluated itemes between $ u $ and $ n $ and represents the similarity between the user $ u $ with user  $ n $ and $ \in [-1.0, 1.0] $, where $ 1.0 $ corresponds to a perfect similarity and $ -1.0 $ to its complement, in this context, we can choose only positive correlations to improve the prediction. This formulation analyzes similarities in ratings for items evaluated together with $ i $ (corrating).
@@ -384,32 +385,89 @@ calcular también tiempo de ejecución, procesamiento y memoria requeridos.
     The algorithm can be implemented including all the users of the set as neighbors of each user, although by limiting it to the closest $k$ neighbors to each user improves its accuracy and efficiency. The challenge is to choose a well suited $k$ for the dataset. Even so, its implementation is expensive since it requires comparing each user with the complete set, so the time and memory for processing do not scale well as users and ratings increase. 
     
     
-    \item \textbf{ItemKnn:}, estimaer mejor k
-    
-    Item-based Nearest Neighbor (IBNN): Corresponden a transponer el problema anterior, mientras que los algoritmos user-based generan predicciones basadas en similaridades entre usuarios, los item-based lo hacen basándose en similaridades entre items, es decir, la predicción para un item se basa en ratings para items similares. Así, una predicción para un usuario u de un item i puede ser representada como la composición de sumas ponderadas de ratings del mismo usuario para los items mas similares de i (análogamente a la derivación (4)).
+    \item \textbf{ItemKnn: } corresponds to the transpose of the previous problem, while user-based algorithms generate predictions based on similarities among users, the item-based does so based on similarities between items, that is, the prediction for an item is based on ratings for similar items. Thus, a prediction for a user $u$ of an item $i$ can be represented as the composition of weighted sums of ratings of the same user for the most similar items of $i$ 
     
     \begin{equation}
         pred(u,i)=\Bar{r}+ \frac{\displaystyle \sum_{n \subset RI(u)}iSim(i,j)*r_{ui}}{\displaystyle \sum_{n \subset RI(u)}iSim(i,j)}
     \end{equation}
-    Donde $RI(u)$ corresponde a los itemes evaluados por $u$.
+    Where $RI(u)$ corresponds to the rated items by $u$.
     
-    Como los datos con que se compone la predicción están dados por todos los correspondientes al mismo usuario, no es necesario centrar la suma ponderada como en el caso anterior. Análogamente, itemSim() corresponde a la medida de similaridad entre los itemes i y j. La métrica de similaridad mas popular y precisa para calcular esta similaridad es la del coseno subjacente ajustado que se muestra a continuación: 
+    As the data on which the prediction is based upon all the data corresponding to the same user, it is not necessary to center the weighted sum as in the previous case. Analogously, $itemSim()$ corresponds to the measure of similarity between items i and j. The most popular and accurate similarity metric to calculate this similarity are pearson and the adjusted cosine that is shown below:
+    
      \begin{equation}
-        iSim(u,n)=\frac{\displaystyle \sum_{u \subset RB_{i,j}}(r_{ui}-\Bar{r}_{u})(r_{uj}-\Bar{r}_{u})}{ \sqrt{\displaystyle \sum_{u \subset RB_{i,j}}(r_{ui}-\Bar{r}_{u})^2}  \sqrt{\displaystyle \sum_{u \subset RB_{i,j}}(r_{uj}-\Bar{r}_{u})^2} }
+        Corr(u,n)=\frac{\displaystyle \sum_{u \subset RB_{i,j}}(r_{ui}-\Bar{r}_{u})(r_{uj}-\Bar{r}_{u})}{ \sqrt{\displaystyle \sum_{u \subset RB_{i,j}}(r_{ui}-\Bar{r}_{u})^2}  \sqrt{\displaystyle \sum_{u \subset RB_{i,j}}(r_{uj}-\Bar{r}_{u})^2} }
     \end{equation}
     
-    Donde el set $RB_{i,j}$ corresponde al set de usuarios que han dado rating tanto a $i$ como a $j$. Aunque hay evidencia de que IBNN es más preciso que UBNN, de todas formas el tamaño del modelo crece cuadráticamente con el número de items. Hay diferentes técnicas para mejorar el uso de memoria, como limitar el procesamiento hasta k corratings o retener solo las n mejores correlaciones para cada item (esto puede provocar que los itemes correlacionados con los ratings del usuario no contengan el item objetivo)
+    \begin{equation}
+        CosSim(u,n)= 
+        \frac{ \displaystyle\sum_{u \subset RB_{i,j}} r_{ui}*r_{uj} }
+        {\displaystyle \sqrt{\sum_{u \subset RB_{i,j}}r_{ui}^2}
+                        \sqrt{\sum_{u \subset RB_{i,j}}r_{uj}^2}}
+    \end{equation}
     
-    \item \textbf{SlopeOne:},
-    \item \textbf{SVD:}.
-    \item \textbf{ALS o ALScg:} este modelo lo puede usar para la tarea de ranking. Si tiene problemas con pyreclab, puede usar la biblioteca implicit1.
+    Where the set $RB_{i,j}$ corresponds to the set uf users who have rated $i$ and $j$ together. Although there is evidence that Itemknn is more accurate than UserKnn, in any case the size of the model grows quadratic on the number of items. There are different techniques to improve the use of memory, such as limiting the processing to $k$ corratings or retaining only the $n$ best correlations for each item (this may cause that the items correlated with the user's ratings do not contain the objective item)
+    
+    \item \textbf{SlopeOne: }
+    This algorithm is based on the concept of deviation between items and users \cite{c7}, which item will like best a user than another.\\
+    It is subtracted the average rating of the two items considered for the deviation, this is the deviation between the item j and the item k:
+    \begin{equation}
+        dev_{j,k} = \sum_{u_i\in I_{jk}} \frac{r_{ij}-r{ik}}{card(I_{jk})}
+    \end{equation}
+    where $I_{jk}$ is the user set with rated item $j$ and $k$.
+    For the prediction of the unknown rating:
+    \begin{equation}
+        P(u)_j = \frac{\sum_{u_i\in I_{jk}}(dev_{j,k}+u_k)}{card(R_j)}
+    \end{equation}
+    where $R_j$ is the item set which are rated by the user.\\
+    
+    \item \textbf{SVD: }
+    This algorithm consist in a matrix factorization technique, to reduce the number of features of the data set. The factorization is for the recommendation purpose.\\
+    Each item is represented y a vector $q_i$ and each user by a vector $u_j$. The expected rating:
+    \begin{equation}
+        expected\_rating = q_i^Tu_j
+    \end{equation}
+    So, each vector can be found minimizing the square error difference, the difference between the known rating and the dot product:
+    \begin{equation}
+        minimum(u,q) \sum_{(j,i)\in K}(r_{ji}-q_i^Tu_j)^2
+    \end{equation}
+    \\
+    
+    \item \textbf{ALS: } 
+    This algorithm works as an iterative optimization process. The idea is to arrive in each iteration to a closer factorized representation of our data.\\
+    The original matrix R if dimension $u\times i$ where $u$ is the users and $i$ the items. We calculate a U and V matrices, that represent users and items hidden features, dimensions $u\times f$ and $f \times i$, f the number of features. The idea is that $R\approx U\times V$.\\
+    Using least squares iteratively we can obtain the proper weights that describes the approximation of R.\\
+    
+\end{enumerate}
+
+\subsection{Experiments}
+
+Our experimental desing is implemented using \textit{Hold-Out}. We divide the data from the file \textit{training\_data.txt} in 2 parts, $70\%$ for training and $30\%$ for testing.\\
+We adopt the \textit{Hold-Out} strategy taking into account the execution time and possibles drawbacks in the implementation. \textit{Cross-Validation} is a better strategy to obtain real metrics \cite{c6}, but to secure a successful work, we accept the trade-off favoring time over a more real metric.\\
+
+\begin{enumerate}
+
+    \item \textbf{UserKnn: }
+    We increase the number of neighbour in 5, for each step. We start with 5 neighbours and we finish with 30 neighbours.
+    
+    \item \textbf{ItemKnn: } We follow the same strategy from \textit{UserKnn}. We start with 5 neighbours, increasing in 5 each step, until we arrived 30 neighbours.
+    
+    \item \textbf{SlopeOne: } This method does not requieres futher computation, there is no parameter tunning to perform.
+    
+    \item \textbf{SVD: } We change 2 parameters from this method, the number of factors and the iterations. We increment the number of factor in power of 10, from 10 to 1000. This plan is performed with 10 iterations and repeated with 200 iterations. 
+    
+    \item \textbf{ALS: } Following a similar strategy as in \textit{SVD}, we change 2 parameters from this method, the number of factors and the iterations. We increment the number of factor in 25, from 25 to 75. This plan is performed with 5 iterations and repeated with 15 iterations.
+    
 \end{enumerate}
 
 
 \section{Results}
 
-El informe debe tener una tabla donde las filas presentan
-los métodos y las columnas las metricas RMSE, MAE, MAP@10 y nDCG@10. Presente en esta tabla cada método sólo una vez. Si el método tiene parámetros, presente la versión del método con los parámetros que le dieron mejores resultados.
+Here we present the results from the conducted experiments using \textit{UserKnn}, \textit{ItemKnn}, \textit{SlopeOne}, \textit{SVD} and \textit{ALS}.\\
+We found that $k=30$ is the best parameter for \textit{UserKnn} (figure \ref{fig:MAE_UserKnn} and  \ref{fig:RMSE_UserKnn}). We observe in both curves, MAE and RMSE, as we increase the number of neighbours both metrics show better performance of the model.\\
+We note the same behavior for \textit{ItemKnn}, we found the best parmeter is $k=30$ (figure \ref{fig:MAE_ItemKnn} and \ref{fig:RMSE_ItemKnn}). As we look at in MAE and RMSE curves, the performance of the model is best as we increase the number of neighbours.\\
+In the case of \textit{SVD}, we observe the best combination of parameters is with $factor=1000$ and $iteration=100$ (figure \ref{fig:MAE_SVD} and \ref{fig:RMSE_SVD}). In both curves while we increase the number of factor the curves, MAE and RMSE, show better results. Also we can note that with less iteration the curve drops more. The curve with a 100 iterations works better than with 200 iterations.\\
+We implement our experiments in \textit{Google Colab} with GPU. In terms of execution time, \textit{SlopeOne} is the model that takes less time $29.33 s$. The models that takes more excution time are \textit{ItemKnn} and \textit{UserKnn} with $1115.21 s$ and $3270.64 s$ respectively (table \ref{exctime-data}). With GPU the execution time improves considerably, in particular on those models that required more time.\\
+We note that the model with better performance is \textit{SVD}. We compare RMSE and nDCG in \textit{UserKnn}, \textit{ItemKnn} and \textit{SlopeOne}, the three models behave very similar. The major diferences between those models are in the nDCG metric (table \ref{raw-data}).\\
 
 \begin{table}[]
 \centering
@@ -428,6 +486,24 @@ ALS   & -   & -     & -    &    -   & - \\ \hline
 \end{tabular}
 \caption{Results}
 \label{raw-data}
+\end{table}
+
+\begin{table}[]
+\centering
+\begin{tabular}{|c|c|}
+\hline 
+\rowcolor[HTML]{DAE8FC} 
+Algorithm & Execution time [s]   \\ \hline \hline
+UserKnn   & 3270.64  \\ \hline
+ItemKnn   & 1115.21  \\ \hline
+SlopeOne  & 29.33  \\ \hline
+SVD       & 53.62  \\ \hline
+\dots     &   \\ \hline
+ALS       &  - \\ \hline
+
+\end{tabular}
+\caption{Execution Time}
+\label{exctime-data}
 \end{table}
 
 \begin{figure}[h]
@@ -470,15 +546,9 @@ ALS   & -   & -     & -    &    -   & - \\ \hline
         \end{figure}
 
 \section{Discussion}
+%\section{Sensitivity Analysis}
 
-Describir los resultados obtenidos. Además deben comparar y
-analizar los diferentes métodos respecto a, al menos, su implementación (dificultades y otros),
-tiempo de ejecución, procesamiento y memoria requeridos, y métricas de rendimiento (RMSE y
-nDCG).
-
-\section{Sensitivity Analysis}
-
-In this section we analyse the effect the diferent model parameters have on the results.
+In this section we discuss and analyze the effect the different model parameters have on the results.\\
 
 \begin{enumerate}
     \item Item Knn: figure \ref{fig:item_knn-param-analysis} depicts the MAE and RMSE progression according to different neighbor carnality. It is pretty straightforward to notice to see that it has an inverted U-shape relationship, the optimal (minimum error) can be found at approximately 30 neighbors.
@@ -525,7 +595,9 @@ In this section we analyse the effect the diferent model parameters have on the 
 
 \section{Conclusion}
 
-In this work we developed several recommendation algorithms for a beer selling platform. The data analysis section allowed us to get a more profound comprehension of the inherent complexities of the used data, finding out that they indeed suffer from dimensionality issues like many items with poor rating frequency and only a couple with exorbitantly high number of ratings,  we infer those items are the most popular ones. The case of users, was less extreme in the case that the users that had a higher rating frequency were no so outliered than the rest and the mean ratings per user was much higher than for the item case. This has a direct impact on the algorithm performance, placing userKnn has more neighbors better positioned at ranking task than ItemKnn but reporting worst performance on error measurements. Even so, SVD beats them all on error and ranking performance.
+In this work we test several recommendation algorithms for a beer selling platform. The data analysis section allowed us to get a more profound comprehension of the inherent complexities of the used data. We found out the data indeed suffer from dimensionality issues like many items with poor rating frequency and only a couple with exorbitantly high number of ratings.  We infer those items are the most popular ones. The case of users was less extreme, in the case that the user that had a higher rating frequency were no so outliered than the rest. The mean ratings per user was much higher than for the item case. This has a direct impact on the algorithm performance, placing \textit{UserKnn} has more neighbors better positioned at ranking task than \textit{ItemKnn}, but reporting worst performance on error measurements. Even so, \textit{SVD} beats them all on error and ranking performance. Also in terms of execution time, \textit{SVD} presents a very good time compared to \textit{ItemKnn} and \textit{UserKnn}.\\
+So for the task of generate recommendation, we choose \textit{SVD} method over all others to pursue the objective of recommend beers in the \textit{Pybeerlab} plataform.
+
 
 
 
@@ -550,7 +622,9 @@ In this work we developed several recommendation algorithms for a beer selling p
 
 \bibitem{c5} L. Van der Maaten and G. Hinton. Visualizing data using t-sne. Journal of Machine Learning Research, 9(2579-2605):85, 2008.
 
+\bibitem{c6} Sanjay Y. and Sanyam S. Analysis of k-Fold Cross-Validation over Hold-Out Validation on Colossal Datasets for Quality Classification. IEEE 6th International Conference on Advanced Computing (IACC), 2016.
 
+\bibitem{c7} Jingjiao L., Limei S. and Jiao W. A Slope One Collaborative Filtering Recommendation Algorithm Using Uncertain Neighbors Optimizing. Lecture Notes in Computer Science book series, volume 7142, pp 160-166, 2011.
 
 
 
